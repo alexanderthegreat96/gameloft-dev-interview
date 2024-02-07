@@ -1,3 +1,12 @@
 # Gameloft Senior Dev Interview App
 
-Check the stack
+### To install
+ - cp backend/.env_example backend/.env
+ - cp frontend/.env_example frontend/.env
+ - cp .env_example .env
+ - docker compose up --build or ./install.sh
+ - after the installation is done, execute [php artisan migrate] in the backend container
+
+### Check the APP
+ - FRONTEND: http://localhost:5000
+ - API LIVES AT: http://localhost:15000
