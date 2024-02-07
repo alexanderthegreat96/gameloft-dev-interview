@@ -1,0 +1,76 @@
+version: "3.7"
+services:
+    web:
+        container_name: "react-frontend"
+        build:
+            context: .
+            dockerfile: frontend/Dockerfile
+        ports:
+            - "${FRONTEND_SERVER_PORT:-3000}:80"
+        volumes:
+            - "./frontend/node_modules:/usr/src/app/node_modules"
+            - "./frontend/public:/usr/src/app/public"
+            - "./frontend/src:/usr/src/app/src"
+            - "./frontend/.env:/usr/src/app/.env"
+        networks:
+            - gameloft-net
+
+    mysql:
+        image: mysql:8.3.0
+        container_name: "backend-mysql"
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        ports:
+            - "${DB_PORT:-3306}:3306"
+        volumes:
+            - ./mysql_data:/var/lib/mysql
+        networks:
+            - gameloft-net
+
+    backend:
+        container_name: "backend"
+        build:
+            context: .
+            dockerfile: backend/Dockerfile
+        ports:
+            - "${OCTANE_SERVER_PORT:-8000}:8000"
+        volumes:
+            - backend:/var/www/html
+        depends_on:
+            - mysql
+        environment:
+            - PHP_OPCACHE_ENABLE=1
+            - PHP_OPCACHE_ENABLE_CLI=1
+            - PHP_OPCACHE_MEMORY_CONSUMPTION=128
+            - PHP_OPCACHE_MAX_ACCELERATED_FILES=10000
+            - PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
+        networks:
+            - gameloft-net
+
+    redis:
+        image: redis:7.2.4-alpine
+        container_name: "backend_redis"
+        command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD}"
+        volumes:
+            - ./redis-data:/data
+        ports:
+            - "${REDIS_PORT:-6379}:6379"
+        networks:
+            - gameloft-net
+
+networks:
+    gameloft-net:
+        driver: bridge
+
+# using this method
+# to speed up the delivery of
+# the application
+# on windows
+# you may remove this on mac or linux
+volumes:
+    backend:
+        name: backend
+        external: true

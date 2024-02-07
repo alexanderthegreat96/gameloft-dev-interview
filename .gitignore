@@ -20,3 +20,5 @@ Thumbs.db
 *.sublime-workspace
 /node_modules
 /vendor
+/mysql_data
+/redis-data
